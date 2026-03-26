@@ -51,11 +51,11 @@
 ### 📝 深度速读
 **Paper Reader**
 
-发一个 arXiv 链接，AI 读完 PDF，生成结构化笔记，还会保存精美 HTML 页面。
+发一个 arXiv 链接，AI 读完 PDF，基于 **CRGP 分析法** 生成结构化笔记，还会保存精美 HTML 页面。
 
-- 📌 动机 · 方法 · 实验结果 · 局限
-- 💡 一句话核心要点
-- 🎨 自动生成 HTML 阅读笔记
+- 📖 **CRGP 分析**：Context → Related Work → Gap → Proposal
+- 📊 含图表、具体实验数字、关键发现
+- 🎨 自动生成带图 HTML 阅读笔记
 - 🇨🇳 中英双语友好
 
 **触发：** arXiv 链接 / `帮我读一下`
@@ -179,12 +179,16 @@
 > 📌 **AutoRefine: Search and Refine During Think**
 > 👤 Shi et al. | 📅 2025 | 📍 NeurIPS 2025
 >
-> 🔍 **Motivation** — LLM 推理过程中容易陷入错误路径，缺少实时校正机制...
-> ⚙️ **Method** — 在推理链中动态触发搜索，对中间结论进行验证和精炼...
-> 📊 **Results** — 87.3% on MATH · 72.1% on HotpotQA · +5.2% vs. baseline
-> ✨ **Takeaway** — 推理时检索比推理后检索更有效，能减少幻觉
+> 📖 **CRGP 分析**
+> 🔹 **Context** — RAG 让 LLM 查询外部知识，但检索到的信息常含噪声
+> 🔹 **Gap** — 现有方法只在推理前/后检索，缺少推理过程中的迭代精炼
+> 🔹 **Proposal** — 在推理链的连续搜索间插入「知识精炼」步骤
 >
-> 💾 HTML 笔记已保存 → ~/.openclaw/workspace/research-claws-output/2503.19823.html
+> ⚙️ **方法** — Search-and-Refine-During-Think + 检索特定奖励 GRPO
+> 📊 **实验** — 2WikiMHQA EM 67.7 · HotpotQA EM 55.3 · 多跳推理显著提升
+> ✨ **洞察** — 精炼检索到的知识比检索本身更重要
+>
+> 💾 HTML 笔记已保存（含图表 + CRGP 完整分析）
 
 ---
 

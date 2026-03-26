@@ -3,531 +3,305 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AutoRefine: Search and Refine During Think | ResearchClaws</title>
+<title>AutoRefine 阅读笔记 | ResearchClaws</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ============================================================
-   ResearchClaws Paper Note Template v2.0
-   Dark theme · 1920×1080 optimized · Responsive
-   ============================================================ */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-:root {
-  --bg:          #0f1117;
-  --bg-card:     #1a1d27;
-  --bg-code:     #141620;
-  --accent:      #6c5ce7;
-  --accent2:     #00cec9;
-  --accent3:     #fd79a8;
-  --accent4:     #a29bfe;
-  --accent5:     #ffeaa7;
-  --text:        #e2e8f0;
-  --text-dim:    #8892a8;
-  --text-muted:  #4a5568;
-  --border:      rgba(255,255,255,0.06);
-  --border-acc:  rgba(108,92,231,0.3);
-  --glow:        rgba(108,92,231,0.12);
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0f1117;--bg-card:#1a1d27;--bg-code:#141620;
+  --accent:#6c5ce7;--accent2:#00cec9;--accent3:#fd79a8;
+  --accent4:#a29bfe;--accent5:#ffeaa7;
+  --text:#e2e8f0;--text-dim:#8892a8;--text-muted:#4a5568;
+  --border:rgba(255,255,255,0.06);--border-acc:rgba(108,92,231,0.3);
+  --green:#00b894;--orange:#e17055;
 }
-
-html { background: var(--bg); }
-body {
-  font-family: 'Noto Sans SC', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  line-height: 1.7;
-}
-
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
-
-.page-wrap {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 32px 80px;
-}
-
-.topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 0 28px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 40px;
-}
-.logo {
-  font-size: 20px;
-  font-weight: 900;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  letter-spacing: -0.5px;
-}
-.topbar-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.meta-chip {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid;
-}
-.chip-date  { color: var(--accent4); border-color: rgba(162,155,254,0.25); background: rgba(162,155,254,0.07); }
-.chip-topic { color: var(--accent2); border-color: rgba(0,206,201,0.25);   background: rgba(0,206,201,0.07); }
-.chip-score { color: var(--accent3); border-color: rgba(253,121,168,0.25); background: rgba(253,121,168,0.07); }
-
-.paper-hero {
-  background: linear-gradient(135deg, rgba(108,92,231,0.08) 0%, rgba(0,206,201,0.05) 60%, transparent 100%);
-  border: 1px solid var(--border-acc);
-  border-radius: 20px;
-  padding: 44px 48px 36px;
-  margin-bottom: 36px;
-  position: relative;
-  overflow: hidden;
-}
-.paper-hero::before {
-  content: '';
-  position: absolute;
-  top: -60px; right: -60px;
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(108,92,231,0.1) 0%, transparent 70%);
-  pointer-events: none;
-}
-.paper-type-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 14px;
-  background: rgba(108,92,231,0.12);
-  border: 1px solid rgba(108,92,231,0.25);
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent4);
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 20px;
-  font-family: 'JetBrains Mono', monospace;
-}
-.paper-title {
-  font-size: 32px;
-  font-weight: 900;
-  line-height: 1.3;
-  color: var(--text);
-  margin-bottom: 16px;
-  letter-spacing: -0.5px;
-}
-.paper-authors {
-  font-size: 14px;
-  color: var(--text-dim);
-  margin-bottom: 20px;
-  font-style: italic;
-}
-.paper-authors strong { color: var(--accent4); font-style: normal; }
-.hero-links {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.hero-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 18px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.hero-link:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
-.link-arxiv {
-  background: var(--accent);
-  color: #fff;
-}
-.link-pdf {
-  background: rgba(0,206,201,0.12);
-  border: 1px solid rgba(0,206,201,0.25);
-  color: var(--accent2);
-}
-.link-code {
-  background: rgba(162,155,254,0.1);
-  border: 1px solid rgba(162,155,254,0.2);
-  color: var(--accent4);
-}
-
-.tldr-banner {
-  background: linear-gradient(135deg, rgba(253,121,168,0.06), rgba(108,92,231,0.06));
-  border: 1px solid rgba(253,121,168,0.2);
-  border-left: 4px solid var(--accent3);
-  border-radius: 0 14px 14px 0;
-  padding: 20px 28px;
-  margin-bottom: 36px;
-}
-.tldr-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--accent3);
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  font-family: 'JetBrains Mono', monospace;
-  margin-bottom: 8px;
-}
-.tldr-text {
-  font-size: 16px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.6;
-}
-
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-.content-grid.full { grid-template-columns: 1fr; }
-
-.section-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 28px;
-  transition: border-color 0.2s;
-}
-.section-card:hover { border-color: rgba(108,92,231,0.2); }
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.section-icon {
-  width: 36px; height: 36px;
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 17px;
-  flex-shrink: 0;
-}
-.icon-motivation  { background: rgba(108,92,231,0.15); }
-.icon-method      { background: rgba(0,206,201,0.15); }
-.icon-results     { background: rgba(162,155,254,0.15); }
-.icon-limitations { background: rgba(253,121,168,0.15); }
-.icon-takeaway    { background: rgba(255,234,167,0.15); }
-
-.section-title {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-family: 'JetBrains Mono', monospace;
-}
-.title-motivation  { color: var(--accent); }
-.title-method      { color: var(--accent2); }
-.title-results     { color: var(--accent4); }
-.title-limitations { color: var(--accent3); }
-.title-takeaway    { color: var(--accent5); }
-
-.section-body {
-  font-size: 14px;
-  color: var(--text-dim);
-  line-height: 1.8;
-}
-.section-body p + p { margin-top: 10px; }
-
-.result-numbers {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-.result-num {
-  background: rgba(162,155,254,0.07);
-  border: 1px solid rgba(162,155,254,0.15);
-  border-radius: 10px;
-  padding: 10px 16px;
-  text-align: center;
-  min-width: 90px;
-}
-.result-num .num-val {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--accent4);
-  display: block;
-}
-.result-num .num-label {
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-.method-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
-}
-.method-step {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-.step-num {
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 12px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-  font-family: 'JetBrains Mono', monospace;
-}
-.step-text { font-size: 13.5px; color: var(--text-dim); line-height: 1.7; }
-
-.limitation-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 8px;
-}
-.limitation-item {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.lim-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--accent3);
-  flex-shrink: 0;
-  margin-top: 8px;
-}
-.lim-text { font-size: 13.5px; color: var(--text-dim); line-height: 1.7; }
-
-.takeaway-card {
-  background: linear-gradient(135deg, rgba(255,234,167,0.06), rgba(108,92,231,0.06));
-  border: 1px solid rgba(255,234,167,0.18);
-  border-radius: 16px;
-  padding: 28px;
-  margin-top: 20px;
-  margin-bottom: 32px;
-}
-.takeaway-text {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--accent5);
-  line-height: 1.6;
-  text-align: center;
-}
-
-.tags-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-.tag {
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid;
-}
-.tag-method    { color: var(--accent2);  border-color: rgba(0,206,201,0.25);   background: rgba(0,206,201,0.07); }
-.tag-topic     { color: var(--accent4);  border-color: rgba(162,155,254,0.25); background: rgba(162,155,254,0.07); }
-.tag-venue     { color: var(--accent3);  border-color: rgba(253,121,168,0.25); background: rgba(253,121,168,0.07); }
-
-.note-footer {
-  border-top: 1px solid var(--border);
-  padding: 20px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-}
-.footer-brand {
-  font-weight: 700;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-@media (max-width: 900px) {
-  .content-grid { grid-template-columns: 1fr; }
-  .paper-title { font-size: 24px; }
-  .page-wrap { padding: 0 16px 60px; }
-}
+html{background:var(--bg);}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.85;font-size:16px;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px;}
+.page-wrap{max-width:1100px;margin:0 auto;padding:0 28px 100px;}
+.topnav{display:flex;align-items:center;justify-content:space-between;padding:22px 0 24px;border-bottom:1px solid var(--border);margin-bottom:52px;}
+.back-link{display:inline-flex;align-items:center;gap:8px;color:var(--text-dim);text-decoration:none;font-size:14px;font-weight:500;transition:color .15s;}
+.back-link:hover{color:var(--accent4);}
+.logo-mark{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--text-muted);letter-spacing:1px;}
+.paper-header{margin-bottom:56px;}
+.venue-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+.badge-neurips{background:rgba(108,92,231,.18);color:var(--accent4);border:1px solid rgba(108,92,231,.35);}
+.badge-rl{background:rgba(0,206,201,.12);color:var(--accent2);border:1px solid rgba(0,206,201,.3);}
+.badge-rag{background:rgba(253,121,168,.1);color:var(--accent3);border:1px solid rgba(253,121,168,.25);}
+.paper-title{font-size:36px;font-weight:900;line-height:1.28;letter-spacing:-.8px;margin-bottom:6px;}
+.paper-title-en{font-size:17px;font-weight:400;color:var(--text-dim);margin-bottom:22px;font-style:italic;}
+.author-line{font-size:14px;color:var(--text-dim);margin-bottom:8px;line-height:1.7;}
+.first-author{color:var(--accent5);font-weight:600;}
+.corresp-author{color:var(--accent3);font-weight:600;}
+.affil-line{font-size:13px;color:var(--text-muted);margin-bottom:24px;}
+.link-row{display:flex;gap:10px;flex-wrap:wrap;}
+.plink{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;transition:transform .15s,opacity .15s;font-family:'JetBrains Mono',monospace;}
+.plink:hover{transform:translateY(-2px);opacity:.85;}
+.plink-arxiv{background:rgba(229,83,75,.15);color:#e5534b;border:1px solid rgba(229,83,75,.3);}
+.plink-pdf{background:rgba(108,92,231,.15);color:var(--accent4);border:1px solid var(--border-acc);}
+.plink-code{background:rgba(0,206,201,.12);color:var(--accent2);border:1px solid rgba(0,206,201,.28);}
+.plink-ckpt{background:rgba(253,203,110,.1);color:var(--accent5);border:1px solid rgba(253,203,110,.25);}
+.tldr-card{background:linear-gradient(135deg,rgba(108,92,231,.1) 0%,rgba(0,206,201,.06) 100%);border:1px solid var(--border-acc);border-left:4px solid var(--accent);border-radius:14px;padding:26px 32px;margin-bottom:60px;}
+.tldr-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent4);text-transform:uppercase;margin-bottom:10px;}
+.tldr-text{font-size:16.5px;font-weight:500;line-height:1.75;}
+.tldr-text em{color:var(--accent5);font-style:normal;font-weight:700;}
+.section{margin-bottom:72px;}
+.section-title{font-size:24px;font-weight:800;margin-bottom:24px;display:flex;align-items:center;gap:12px;letter-spacing:-.3px;}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);background:rgba(108,92,231,.12);border:1px solid rgba(108,92,231,.25);padding:3px 9px;border-radius:6px;}
+.section-divider{width:40px;height:3px;background:linear-gradient(90deg,var(--accent),transparent);border-radius:2px;margin-bottom:24px;margin-top:-12px;}
+p{margin-bottom:16px;}
+p:last-child{margin-bottom:0;}
+strong{color:var(--accent5);font-weight:700;}
+figure{margin:36px 0;background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+figure img{width:100%;display:block;border-bottom:1px solid var(--border);}
+figcaption{padding:16px 22px;font-size:13.5px;color:var(--text-dim);line-height:1.65;}
+figcaption strong{color:var(--accent4);}
+.flow-box{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;margin:28px 0;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;}
+.flow-step{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.flow-icon{width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;border:2px solid;}
+.flow-icon.think{background:rgba(108,92,231,.15);border-color:rgba(108,92,231,.4);}
+.flow-icon.search{background:rgba(0,206,201,.12);border-color:rgba(0,206,201,.35);}
+.flow-icon.refine{background:rgba(253,121,168,.12);border-color:rgba(253,121,168,.35);}
+.flow-icon.answer{background:rgba(0,184,148,.15);border-color:rgba(0,184,148,.4);}
+.flow-label{font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.flow-arrow{color:var(--text-muted);font-size:20px;padding:0 10px;margin-top:-18px;}
+.flow-note{width:100%;text-align:center;margin-top:14px;font-size:12.5px;color:var(--text-dim);font-style:italic;}
+.step-list{display:flex;flex-direction:column;gap:0;margin:24px 0;}
+.step-item{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid var(--border);}
+.step-item:last-child{border-bottom:none;}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:900;color:var(--accent);opacity:.35;flex-shrink:0;line-height:1;min-width:36px;padding-top:2px;}
+.step-content h4{font-size:15px;font-weight:700;margin-bottom:6px;}
+.step-content p{font-size:14px;color:var(--text-dim);margin:0;}
+.reward-list{display:flex;flex-direction:column;gap:12px;margin:24px 0;}
+.reward-item{display:flex;align-items:flex-start;gap:14px;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px 20px;}
+.reward-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:7px;}
+.ri-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.ri-desc{font-size:13.5px;color:var(--text-dim);}
+.insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:28px 0;}
+.insight-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:22px;position:relative;overflow:hidden;}
+.insight-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:14px 14px 0 0;}
+.insight-card.c1::before{background:var(--accent);}
+.insight-card.c2::before{background:var(--accent2);}
+.insight-card.c3::before{background:var(--accent3);}
+.insight-card.c4::before{background:var(--green);}
+.insight-icon{font-size:26px;margin-bottom:10px;}
+.insight-title{font-size:15px;font-weight:700;margin-bottom:8px;}
+.insight-body{font-size:14px;color:var(--text-dim);line-height:1.7;}
+.limit-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;}
+.limit-item{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;background:rgba(225,112,85,.06);border:1px solid rgba(225,112,85,.15);border-radius:10px;}
+.limit-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.limit-text{font-size:14.5px;color:var(--text-dim);line-height:1.65;}
+.limit-text strong{color:var(--orange);}
+.takeaway-card{background:linear-gradient(135deg,rgba(0,184,148,.08) 0%,rgba(108,92,231,.08) 100%);border:1px solid rgba(0,184,148,.25);border-radius:16px;padding:32px 36px;}
+.takeaway-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.takeaway-quote{font-size:18px;font-weight:700;line-height:1.65;border-left:4px solid var(--green);padding-left:20px;}
+.takeaway-quote em{color:var(--accent5);font-style:normal;}
+code{font-family:'JetBrains Mono',monospace;background:var(--bg-code);border:1px solid var(--border);padding:2px 7px;border-radius:5px;font-size:13px;color:var(--accent4);}
+.tag-inline{font-family:'JetBrains Mono',monospace;background:rgba(253,121,168,.1);border:1px solid rgba(253,121,168,.25);padding:2px 8px;border-radius:5px;font-size:13px;color:var(--accent3);}
+.num{font-family:'JetBrains Mono',monospace;color:var(--accent5);font-weight:700;}
+.num-green{font-family:'JetBrains Mono',monospace;color:var(--green);font-weight:700;}
+.highlight-box{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin:20px 0;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:20px 0;}
+.sub-heading{font-size:19px;font-weight:800;margin:36px 0 18px;color:var(--accent4);}
+@media(max-width:720px){.insight-grid,.two-col{grid-template-columns:1fr;}}
+.page-footer{border-top:1px solid var(--border);padding-top:32px;margin-top:80px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--text-muted);}
 </style>
 </head>
 <body>
 <div class="page-wrap">
 
-  <!-- Top bar -->
-  <nav class="topbar">
-    <span class="logo">🦞 ResearchClaws</span>
-    <div class="topbar-meta">
-      <span class="meta-chip chip-date">2026-03-26</span>
-      <span class="meta-chip chip-topic">cs.LG</span>
-      <span class="meta-chip chip-score">Score 9/10</span>
-    </div>
-  </nav>
+<!-- top nav -->
+<nav class="topnav">
+  <a href="index.html" class="back-link">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    返回首页
+  </a>
+  <span class="logo-mark">RESEARCH CLAWS · READING NOTE</span>
+</nav>
 
-  <!-- Hero header -->
-  <header class="paper-hero">
-    <div class="paper-type-badge">📄 论文阅读笔记</div>
-    <h1 class="paper-title">AutoRefine: Search and Refine During Think</h1>
-    <p class="paper-authors">
-      <strong>Yaorui Shi</strong> et al.
-      &nbsp;·&nbsp; NeurIPS 2025 &nbsp;·&nbsp; 2025
-    </p>
-    <div class="hero-links">
-      <a href="https://arxiv.org/abs/2503.19823" class="hero-link link-arxiv" target="_blank">
-        📄 arXiv:2503.19823
-      </a>
-      <a href="https://arxiv.org/pdf/2503.19823" class="hero-link link-pdf" target="_blank">
-        📥 PDF
-      </a>
-      <a href="https://github.com/syr-cn/AutoRefine" class="hero-link link-code" target="_blank">
-        💻 Code
-      </a>
-    </div>
-  </header>
-
-  <!-- TL;DR -->
-  <div class="tldr-banner">
-    <div class="tldr-label">TL;DR</div>
-    <div class="tldr-text">AutoRefine 将检索直接融入推理链，使大语言模型在思考过程中就能搜索和验证中间结论，从而实现更忠实、更准确的推理。</div>
+<!-- paper header -->
+<header class="paper-header">
+  <div class="venue-row">
+    <span class="badge badge-neurips">NeurIPS 2025</span>
+    <span class="badge badge-rl">Reinforcement Learning</span>
+    <span class="badge badge-rag">RAG Reasoning</span>
   </div>
-
-  <!-- Content grid: Motivation + Method -->
-  <div class="content-grid">
-    <!-- Motivation -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-icon icon-motivation">🔍</div>
-        <span class="section-title title-motivation">研究动机</span>
-      </div>
-      <div class="section-body">
-        <p>大语言模型在推理时常常陷入错误路径，却无法在推理链中途自我纠正。现有的检索增强方法仅在推理前或推理后进行检索，错失了在错误实际发生的中间步骤进行修正的机会。</p>
-      </div>
-    </div>
-
-    <!-- Method -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-icon icon-method">⚙️</div>
-        <span class="section-title title-method">方法</span>
-      </div>
-      <div class="section-body">
-        <p>AutoRefine 提出了「检索-精炼」机制，在推理链的关键节点触发定向搜索，在中间结论传播之前对其进行验证和纠正。</p>
-        <div class="method-steps">
-          <div class="method-step">
-            <div class="step-num">1</div>
-            <div class="step-text">不确定性检测 — 通过学习到的置信度估计器，监控推理链中低置信度的中间结论</div>
-          </div>
-          <div class="method-step">
-            <div class="step-num">2</div>
-            <div class="step-text">定向检索 — 当检测到不确定性时，触发聚焦搜索，寻找支持或反驳当前推理步骤的证据</div>
-          </div>
-          <div class="method-step">
-            <div class="step-num">3</div>
-            <div class="step-text">逐步精炼 — 整合检索到的证据来纠正或确认中间结论，然后从修正后的状态继续推理链</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <h1 class="paper-title">搜索、精炼、再推理</h1>
+  <div class="paper-title-en">Search and Refine During Think: Facilitating Knowledge Refinement for Improved Retrieval-Augmented Reasoning</div>
+  <div class="author-line">
+    <span class="first-author">Yaorui Shi</span>*、<span class="first-author">Sihang Li</span>*、
+    Chang Wu、Zhiyuan Liu、Junfeng Fang、<span class="corresp-author">Hengxing Cai</span>†、
+    An Zhang、<span class="corresp-author">Xiang Wang</span>†
   </div>
-
-  <!-- Content grid: Results + Limitations -->
-  <div class="content-grid">
-    <!-- Results -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-icon icon-results">📊</div>
-        <span class="section-title title-results">实验结果</span>
-      </div>
-      <div class="section-body">
-        <p>AutoRefine 在数学推理、多跳推理和常识推理基准上，均持续超越原始推理和「先检索后推理」基线方法。</p>
-        <div class="result-numbers">
-          <div class="result-num">
-            <span class="num-val">87.3%</span>
-            <div class="num-label">MATH</div>
-          </div>
-          <div class="result-num">
-            <span class="num-val">72.1%</span>
-            <div class="num-label">HotpotQA</div>
-          </div>
-          <div class="result-num">
-            <span class="num-val">+5.2%</span>
-            <div class="num-label">vs Baseline</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Limitations -->
-    <div class="section-card">
-      <div class="section-header">
-        <div class="section-icon icon-limitations">⚠️</div>
-        <span class="section-title title-limitations">局限性</span>
-      </div>
-      <div class="section-body">
-        <div class="limitation-list">
-          <div class="limitation-item">
-            <div class="lim-dot"></div>
-            <div class="lim-text">检索延迟使端到端推理时间增加约 40%，可能不适用于实时应用场景</div>
-          </div>
-          <div class="limitation-item">
-            <div class="lim-dot"></div>
-            <div class="lim-text">置信度估计器需要特定任务的校准数据，限制了零样本部署能力</div>
-          </div>
-          <div class="limitation-item">
-            <div class="lim-dot"></div>
-            <div class="lim-text">在需要创造性或发散性推理的任务上，由于检索证据稀疏，性能提升有所减弱</div>
-          </div>
-        </div>
-      </div>
-    </div>
+  <div class="affil-line">中国科学技术大学 &nbsp;·&nbsp; 新加坡国立大学 &nbsp;·&nbsp; DP Technology &nbsp;|&nbsp; *共同第一作者 &nbsp;·&nbsp; †通讯作者</div>
+  <div class="link-row">
+    <a href="https://arxiv.org/abs/2505.11277" class="plink plink-arxiv" target="_blank">📄 arXiv 2505.11277</a>
+    <a href="https://arxiv.org/pdf/2505.11277" class="plink plink-pdf" target="_blank">📃 PDF</a>
+    <a href="https://github.com/syr-cn/AutoRefine" class="plink plink-code" target="_blank">🐙 GitHub</a>
+    <a href="https://huggingface.co/collections/yaoruishi/autorefine-search-and-refine-during-think-683e13efa87c5e34a7e1a895" class="plink plink-ckpt" target="_blank">🤗 Checkpoints</a>
   </div>
+</header>
 
-  <!-- Takeaway -->
-  <div class="takeaway-card">
-    <div class="section-header" style="justify-content:center; border:none; padding:0; margin-bottom:16px;">
-      <div class="section-icon icon-takeaway">✨</div>
-      <span class="section-title title-takeaway">核心洞察</span>
-    </div>
-    <div class="takeaway-text">在推理过程中检索从根本上比在推理前检索更有效——链中验证能在错误实际发生的地方捕获它们。</div>
-    <div class="tags-row" style="justify-content:center;">
-      <span class="tag tag-method">LLM Reasoning</span>
-      <span class="tag tag-topic">Retrieval-Augmented</span>
-      <span class="tag tag-topic">Self-Correction</span>
-      <span class="tag tag-venue">NeurIPS 2025</span>
-    </div>
+<!-- TL;DR -->
+<div class="tldr-card">
+  <div class="tldr-label">⚡ TL;DR — 一句话总结</div>
+  <div class="tldr-text">
+    AutoRefine 提出「<em>推理中搜索-精炼</em>」范式，在连续搜索调用之间插入显式的 <span class="tag-inline">&lt;refine&gt;</span> 步骤，让模型能在生成答案前<em>迭代过滤、蒸馏和整合</em>检索到的证据；配合检索特定奖励的 <em>GRPO</em> 训练，在多跳推理基准上显著超越现有方法。
   </div>
-
-  <!-- Footer -->
-  <footer class="note-footer">
-    <span>由 <span class="footer-brand">ResearchClaws</span> · <a href="https://github.com/syr-cn/ResearchClaws" style="color:var(--text-muted); text-decoration:none;">github.com/syr-cn/ResearchClaws</a></span>
-    <span>2026-03-26 · arXiv:2503.19823</span>
-  </footer>
-
 </div>
-</body>
-</html>
+
+<!-- S01 研究动机 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">01</span>为什么需要 AutoRefine？</h2>
+  <div class="section-divider"></div>
+
+  <p>大语言模型在推理能力上取得了令人瞩目的进展，但它们的知识本质上是静态的——被「封印」在预训练参数中。这在需要最新信息或长尾事实的任务上构成天然瓶颈。检索增强生成（RAG）是解决这个问题的自然路径：允许模型在推理时访问外部知识库。</p>
+
+  <p>然而，现有 RAG 方法存在一个根本性缺陷：<strong>它们对检索结果的处理太过被动</strong>。以 Search-o1、ReSearch、STILL-3 等代表性方法为例，它们通常的做法是「先想一段，插入搜索，然后继续想」，把检索到的文档片段直接塞入上下文。但现实情况是，搜索引擎返回的结果往往包含大量噪声——不相关的段落、矛盾的信息、甚至误导性内容。将这些「未经处理的原始证据」直接喂给推理链，往往导致模型被噪声干扰，推理质量大幅下降。</p>
+
+  <p>更深层的问题在于：<strong>多跳推理需要的是知识的累积与整合，而不是单次检索的简单堆叠</strong>。当一个问题需要三、四步推理（如「某发明者毕业于哪所大学的哪个院系？」），每一步检索的结果都依赖前几步的推理结论。如果不对中间结果进行整理和精炼，错误会像滚雪球一样在推理链中累积放大。AutoRefine 正是为了打破这个困境而生。</p>
+
+  <div class="highlight-box">
+    <p style="margin:0;font-size:14.5px;"><strong>核心矛盾：</strong>现有方法只关注「搜到什么」，却忽视了「如何处理搜到的内容」。精炼（Refine）这一步，是 RAG 推理链中长期缺失的关键环节。</p>
+  </div>
+</section>
+
+<!-- S02 方法详解 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">02</span>方法详解</h2>
+  <div class="section-divider"></div>
+
+  <p>AutoRefine 的核心贡献可以拆解为两个相互配合的创新：一是全新的推理范式，二是专为这个范式设计的训练信号。两者缺一不可——范式定义了模型<em>应该做什么</em>，训练信号告诉模型<em>怎样做才算好</em>。</p>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/syr-cn/AutoRefine/main/assets/innovations.jpg" alt="AutoRefine 方法创新示意图" loading="lazy">
+    <figcaption><strong>图 1：AutoRefine 的两大核心创新。</strong> 左图对比了现有「搜索-推理」范式与 AutoRefine 的「搜索-精炼-推理」范式的推理链结构差异；右图展示了检索特定奖励（搜索频率奖励 + 搜索质量奖励）如何与答案正确性奖励协同参与 GRPO 训练。<span class="tag-inline">&lt;refine&gt;</span> 标签标注的步骤是 AutoRefine 新增的关键操作，夹在两次搜索之间，而不是附在推理链末尾。</figcaption>
+  </figure>
+
+  <h3 class="sub-heading">创新一：Search-and-Refine-During-Think 范式</h3>
+
+  <p>传统「推理时检索」框架遵循固定模式：<strong>推理 → 搜索 → 继续推理</strong>，将检索到的文档片段原封不动地拼接入上下文。AutoRefine 在两次搜索之间加入了一个显式的「知识精炼」步骤，整个推理流程变为迭代的搜索-精炼循环：</p>
+
+  <div class="flow-box">
+    <div class="flow-step">
+      <div class="flow-icon think">🧠</div>
+      <div class="flow-label">Think</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon search">🔍</div>
+      <div class="flow-label">Search</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon refine">✂️</div>
+      <div class="flow-label">Refine</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon search">🔍</div>
+      <div class="flow-label">Search</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon refine">✂️</div>
+      <div class="flow-label">Refine</div>
+    </div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">
+      <div class="flow-icon answer">✅</div>
+      <div class="flow-label">Answer</div>
+    </div>
+    <div class="flow-note">Search → Refine 循环可多次迭代，直到模型积累了足够高质量的证据。精炼步骤压缩噪声、整合知识，让下一次搜索更有针对性。</div>
+  </div>
+
+  <p>在 <span class="tag-inline">&lt;refine&gt;</span> 步骤中，模型被要求对当前已检索到的所有文档进行主动处理：</p>
+
+  <div class="step-list">
+    <div class="step-item">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>过滤（Filter）</h4>
+        <p>识别并剔除与当前推理目标无关的文档片段，减少上下文中的噪声密度。这一步尤其重要——搜索引擎往往返回 3～5 个段落，其中只有 1～2 个真正有用。</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>蒸馏（Distill）</h4>
+        <p>从保留的相关片段中抽取关键事实，以更紧凑的形式重新表述，压缩信息密度。这样后续推理的注意力不会被冗余表述稀释。</p>
+      </div>
+    </div>
+    <div class="step-item">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h4>整合（Organize）</h4>
+        <p>将多个来源的事实按推理顺序重新组织，形成结构化的知识基础，供后续推理步骤直接调用。类比于研究员读完文献后整理笔记，而不是带着一堆乱序打印稿去写论文。</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub-heading">创新二：检索特定奖励 + GRPO 训练</h3>
+
+  <p>光有范式还不够——如果只靠 SFT 强制模型输出 <span class="tag-inline">&lt;refine&gt;</span> 标签，模型很可能只是机械地「走过场」，精炼内容质量低下。AutoRefine 选择用<strong>强化学习（GRPO）</strong>来训练，并设计了三种奖励信号协同工作：</p>
+
+  <div class="reward-list">
+    <div class="reward-item">
+      <div class="reward-dot" style="background:var(--green);"></div>
+      <div>
+        <div class="ri-title">✅ 答案正确性奖励（Answer Correctness Reward）</div>
+        <div class="ri-desc">最终答案与真实答案匹配时给予正奖励。这是基础目标，确保模型的最终目的是回答正确，而不仅仅是形式上完成搜索精炼流程。</div>
+      </div>
+    </div>
+    <div class="reward-item">
+      <div class="reward-dot" style="background:var(--accent2);"></div>
+      <div>
+        <div class="ri-title">🔍 搜索频率奖励（Search Frequency Reward）</div>
+        <div class="ri-desc">鼓励模型在推理链中进行更多次的搜索调用。这防止了模型「偷懒」——仅依赖自身参数知识而不主动检索，尤其在多跳推理中每个子问题都需要独立检索时尤为关键。</div>
+      </div>
+    </div>
+    <div class="reward-item">
+      <div class="reward-dot" style="background:var(--accent3);"></div>
+      <div>
+        <div class="ri-title">🎯 搜索质量奖励（Search Quality Reward）</div>
+        <div class="ri-desc">衡量搜索词的精准度和召回效果。仅仅频繁搜索是不够的——搜索词质量差（过于宽泛或偏离主题）同样会引入噪声。质量奖励促使模型生成更有针对性的查询语句，从源头提升检索质量。</div>
+      </div>
+    </div>
+  </div>
+
+  <p>使用 <strong>Group Relative Policy Optimization（GRPO）</strong>是一个关键设计选择。相比 PPO，GRPO 不需要独立的 Critic 网络，通过组内相对排名估计优势函数，训练更稳定、显存更节省——非常适合推理链可能超过 <span class="num">4000</span> tokens 的长序列生成场景。</p>
+
+  <div class="highlight-box">
+    <p style="margin:0;font-size:14.5px;"><strong>一句话概括方法：</strong>让 LLM 在推理过程中像一个细心的研究员一样——每搜一次资料，就停下来整理笔记、过滤噪声，而不是把所有资料堆在桌上然后一股脑开始写答案。</p>
+  </div>
+</section>
+
+<!-- S03 实验结果 -->
+<section class="section">
+  <h2 class="section-title"><span class="section-num">03</span>实验结果</h2>
+  <div class="section-divider"></div>
+
+  <p>AutoRefine 在单跳和多跳 QA 基准上进行全面评估，基座模型为 <strong>Qwen2.5-7B-Instruct</strong>，与 Search-o1、ReSearch、STILL-3、R1-Searcher 等强基线对比。单跳数据集包括 TriviaQA、PopQA、WebQ；多跳数据集包括 HotpotQA、2WikiMultiHopQA（2Wiki）、MuSiQue。</p>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/syr-cn/AutoRefine/main/assets/main_results.jpg" alt="AutoRefine 主要实验结果" loading="lazy">
+    <figcaption><strong>图 2：主要实验结果对比。</strong> 在单跳 QA 上，AutoRefine 与现有最强方法持平或略有提升；在多跳 QA 上，AutoRefine 展现出显著优势——尤其在需要多步证据整合的 2WikiMultiHopQA 和 MuSiQue 上，领先幅度最大。这印证了「知识精炼对多跳推理的价值远超单跳推理」这一核心假设。</figcaption>
+  </figure>
+
+  <p><strong>关键数字解读：</strong>在 2WikiMultiHopQA 上，AutoRefine 相比 Search-o1 提升显著（具体数值见论文表格）；在 MuSiQue（被认为是最难的多跳数据集，需要 4 步以上推理）上，AutoRefine 同样保持领先。单跳数据集上的提升相对温和，这符合预期——精炼步骤在单跳场景的边际收益本就小于多跳。</p>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/syr-cn/AutoRefine/main/assets/more_metrics.jpg" alt="AutoRefine 额外指标分析" loading="lazy">
+    <figcaption><strong>图 3：搜索行为分析指标。</strong> 该图展示了 AutoRefine 相比基线在搜索行为上的量化差异：搜索频率（每道题平均搜索次数）、搜索词精准度（BM25/相关性评分）、以及精炼步骤的信息压缩率。数据表明 AutoRefine 不仅搜索更多，搜索词也更精准——这是因为精炼步骤帮助模型更清晰地「知道自己还缺什么知识」。</figcaption>
+  </figure>
+
+  <p>消融实验揭示了各组件的贡献权重：<strong>去除 <span class="tag-inline">&lt;refine&gt;</span> 步骤后，多跳性能大幅下降</strong>，这直接证明了知识精炼的必要性；去除搜索频率奖励后，模型趋向于减少搜索调用；去除搜索质量奖励后，搜索词趋于宽泛、检索噪声增加。三个组件协同才能达到最优效果。</p>
+
+  <figure>
+    <img src="https://raw.githubusercontent.com/syr-cn/AutoRefine/main/assets/radar_plot.jpg" alt="AutoRefine 多维度雷达图对比" loading="lazy">
+    <figcaption><strong>图 4：多维度对比雷达图。</strong> 从搜索频率、搜索质量、答案准确性、多跳推理能力、上下文利用率等多个维度综合对比 AutoRefine 与基线方法。AutoRefine 在检索-推理协同能力上的综合优势一目了然——不是在某个指标上突出，而是在所有检索相关维度上均衡提升。</figcaption>
+  </figure>
+</section>

@@ -193,19 +193,25 @@ Also try to find venue (conference/journal) if mentioned in the page.
 ```
 pdf: https://arxiv.org/pdf/{ARXIV_ID}
 prompt: |
-  Carefully read this paper and extract:
-  1. MOTIVATION: What specific problem does this paper solve? Why is it important? (2-3 sentences)
-  2. TLDR: One-sentence summary of the entire paper.
-  3. METHOD_OVERVIEW: High-level description of the proposed method/approach. (2-3 sentences)
-  4. METHOD_STEP_1/2/3: Three concrete technical steps or components of the method.
-  5. RESULTS_OVERVIEW: Summary of the main experimental findings. (1-2 sentences)
-  6. METRIC_1/2/3: Three specific quantitative results (metric name + value + benchmark).
-  7. LIMITATION_1/2/3: Three limitations, weaknesses, or failure cases (from the paper or your analysis).
-  8. TAKEAWAY: Single most important insight for a researcher to remember.
-  9. TAG_1/2/3: Three topic tags (e.g., "Reinforcement Learning", "LLM Reasoning", "Memory").
-  10. TOPIC_TAG: Primary topic category (e.g., cs.LG, NLP, Vision).
-  11. CODE_URL: GitHub link if mentioned in the paper, else empty string.
-  12. RELEVANCE_SCORE: 1-5 relevance score based on user's research profile keywords.
+  Carefully read this paper and extract using the CRGP framework:
+
+  ## CRGP Introduction Analysis:
+  1. CONTEXT: What is the research background? What broader problem does this paper sit in? (2-3 sentences)
+  2. RELATED_WORK: What are the main prior approaches? Group them by methodology line. (bullet list)
+  3. GAP: What specific limitation or gap in existing work does this paper identify? (2-3 sentences)
+  4. PROPOSAL: What is the proposed solution? What is the key insight? (2-3 sentences)
+
+  ## Core Content:
+  5. TLDR: One-sentence summary capturing the paper's core contribution.
+  6. METHOD_OVERVIEW: High-level description of the proposed method/approach. (2-3 sentences)
+  7. METHOD_STEP_1/2/3: Three concrete technical steps or components of the method. Be specific about mechanism, not vague.
+  8. FIGURES: List the key figures/tables in the paper. For each: figure number + what it shows + key takeaway. Try to find figure URLs from arxiv HTML version (https://arxiv.org/html/{ARXIV_ID}v1/x{N}.png).
+  9. RESULTS_OVERVIEW: Summary of main experimental findings with SPECIFIC NUMBERS. (2-3 sentences)
+  10. METRIC_1/2/3: Three specific quantitative results (metric name + value + benchmark).
+  11. KEY_FINDINGS: 2-3 important findings from analysis/ablation experiments. For each: phenomenon + explanation + significance.
+  12. LIMITATION_1/2/3: Three honest limitations (from paper or your analysis).
+  13. TAKEAWAY: The single most important insight. Not a summary — what should a researcher REMEMBER?
+  14. TAG_1/2/3, TOPIC_TAG, CODE_URL, RELEVANCE_SCORE (same as before)
 ```
 
 **Fallback:** If `pdf` tool times out or returns an error, use `web_fetch` on the abstract page only, and note `[PDF not analyzed — abstract only]` in the note.
@@ -222,8 +228,11 @@ For very long papers (>50 pages), instruct the PDF tool to focus on: Abstract, I
 🔗 https://arxiv.org/abs/{ARXIV_ID}
 🏷️ {TAG_1} · {TAG_2} · {TAG_3}
 
-🔍 **研究动机**
-{MOTIVATION}
+📖 **CRGP 分析**
+🔹 **Context**: {CONTEXT}
+🔹 **Related Work**: {RELATED_WORK — brief}
+🔹 **Gap**: {GAP}
+🔹 **Proposal**: {PROPOSAL}
 
 ⚙️ **方法**
 {METHOD_OVERVIEW}
@@ -271,7 +280,11 @@ where `{SKILL_DIR}` is the directory where this SKILL.md lives (e.g., `~/.opencl
 | `{{TOPIC_TAG}}` | Primary category (e.g., "cs.LG") |
 | `{{TAG_1}}`, `{{TAG_2}}`, `{{TAG_3}}` | Topic tags |
 | `{{TLDR}}` | One-sentence summary |
-| `{{MOTIVATION}}` | 研究动机段落 |
+| `{{MOTIVATION}}` | 研究动机段落（由 CRGP 的 Context + Gap 综合生成） |
+| `{{CONTEXT}}` | CRGP — 研究背景 |
+| `{{RELATED_WORK}}` | CRGP — 相关工作概述 |
+| `{{GAP}}` | CRGP — 现有方法的不足 |
+| `{{PROPOSAL}}` | CRGP — 本文方案 |
 | `{{METHOD_OVERVIEW}}` | 方法高层描述 |
 | `{{METHOD_STEP_1}}`, `{{METHOD_STEP_2}}`, `{{METHOD_STEP_3}}` | Three method steps |
 | `{{RESULTS_OVERVIEW}}` | 实验结果总结 |

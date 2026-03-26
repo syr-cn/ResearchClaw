@@ -43,6 +43,7 @@
 - ⏰ 支持每日定时推送
 
 **触发：** `推荐今日论文`
+[▶ 查看演示](https://syr-cn.github.io/ResearchClaws/showcase/case1-daily-signal-brief.html)
 
 </td>
 <td width="33%" valign="top">
@@ -58,6 +59,7 @@
 - 🇨🇳 中英双语友好
 
 **触发：** arXiv 链接 / `帮我读一下`
+[▶ 查看演示](https://syr-cn.github.io/ResearchClaws/showcase/demo-paper-note.html)
 
 </td>
 <td width="33%" valign="top">
@@ -73,6 +75,7 @@
 - 🔗 每篇都链接到 HTML 笔记
 
 **触发：** `我的论文列表` / `加入待读`
+[▶ 查看演示](https://syr-cn.github.io/ResearchClaws/showcase/demo-reading-list.html)
 
 </td>
 </tr>
@@ -90,6 +93,7 @@
 - 🔄 从对话反馈自动更新
 
 **触发：** `我的研究画像` / `更新我的研究画像`
+[▶ 查看演示](https://syr-cn.github.io/ResearchClaws/showcase/demo-research-profile.html)
 
 </td>
 <td width="33%" valign="top">
@@ -105,6 +109,7 @@
 - ⭐ 时机分析
 
 **触发：** `给我一些研究灵感`
+[▶ 查看演示](https://syr-cn.github.io/ResearchClaws/showcase/case3-research-proposal.html)
 
 </td>
 <td width="33%" valign="top">
@@ -120,6 +125,7 @@
 - 💬 Reviewer 回复起草
 
 **触发：** `论文大纲` / `写引言` / `rebuttal`
+[▶ 查看演示](https://syr-cn.github.io/ResearchClaws/showcase/case4-multi-agent-codebase.html)
 
 </td>
 </tr>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case 2: 一晚上从零到研究提案 | ResearchClaws</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0f1117;
+            --bg-card: #1a1d27;
+            --bg-chat: #141620;
+            --accent: #6c5ce7;
+            --accent2: #00cec9;
+            --accent3: #fd79a8;
+            --accent4: #fdcb6e;
+            --text: #e2e8f0;
+            --text-dim: #8892a8;
+            --text-muted: #4a5568;
+            --user-bubble: #2d3748;
+            --ai-bubble: #1e2235;
+            --border: rgba(255,255,255,0.06);
+        }
+        html, body {
+            width: 1920px; height: 1080px;
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg); color: var(--text); overflow: hidden;
+        }
+        .page {
+            display: grid;
+            grid-template-columns: 360px 1fr 400px;
+            grid-template-rows: 72px 1fr;
+            height: 1080px; width: 1920px;
+        }
+        /* === HEADER === */
+        .header {
+            grid-column: 1 / -1;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 36px;
+            background: linear-gradient(90deg, rgba(108,92,231,0.08), transparent 50%, rgba(253,203,110,0.08));
+            border-bottom: 1px solid var(--border);
+        }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-logo { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-case { font-size: 14px; color: var(--text-dim); padding: 4px 14px; background: rgba(253,203,110,0.12); border-radius: 20px; border: 1px solid rgba(253,203,110,0.2); }
+        .header-tag { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .tag-interactive { background: rgba(108,92,231,0.12); color: var(--accent); border: 1px solid rgba(108,92,231,0.25); }
+        .tag-deep { background: rgba(253,203,110,0.12); color: var(--accent4); border: 1px solid rgba(253,203,110,0.25); }
+        .header-right { display: flex; align-items: center; gap: 24px; font-size: 13px; color: var(--text-muted); }
+        /* === LEFT === */
+        .panel-left { background: var(--bg-card); border-right: 1px solid var(--border); padding: 24px 20px; display: flex; flex-direction: column; overflow: hidden; }
+        .panel-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .phase { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+        .phase.active { border-color: rgba(253,203,110,0.4); background: rgba(253,203,110,0.04); }
+        .phase-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .phase-icon { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+        .pi-1 { background: rgba(0,206,201,0.15); } .pi-2 { background: rgba(108,92,231,0.15); }
+        .pi-3 { background: rgba(253,121,168,0.15); } .pi-4 { background: rgba(253,203,110,0.15); }
+        .phase-label { font-size: 13px; font-weight: 700; }
+        .phase-time { margin-left: auto; font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); }
+        .phase-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+        .phase-tools { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        .phase-tool-tag { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; }
+        .pt-search { background: rgba(0,206,201,0.1); color: var(--accent2); border: 1px solid rgba(0,206,201,0.2); }
+        .pt-read { background: rgba(108,92,231,0.1); color: var(--accent); border: 1px solid rgba(108,92,231,0.2); }
+        .pt-write { background: rgba(253,121,168,0.1); color: var(--accent3); border: 1px solid rgba(253,121,168,0.2); }
+        .pt-agent { background: rgba(253,203,110,0.1); color: var(--accent4); border: 1px solid rgba(253,203,110,0.2); }
+        .phase-arrow { text-align: center; color: var(--text-muted); font-size: 14px; margin: 2px 0; }
+        .stats-box { margin-top: auto; background: rgba(253,203,110,0.06); border: 1px solid rgba(253,203,110,0.15); border-radius: 12px; padding: 14px; }
+        .stats-title { font-size: 11px; font-weight: 700; color: var(--accent4); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-label { font-size: 11px; color: var(--text-dim); }
+        .stat-value { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .sv-cyan { color: var(--accent2); } .sv-purple { color: var(--accent); }
+        .sv-pink { color: var(--accent3); } .sv-gold { color: var(--accent4); }
+        /* === CENTER === */
+        .panel-center { background: var(--bg-chat); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .avatar-ai { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+        .avatar-user { background: var(--user-bubble); font-size: 14px; }
+        .chat-name { font-size: 14px; font-weight: 700; }
+        .chat-status { font-size: 12px; color: var(--accent4); }
+        .chat-body { flex: 1; padding: 16px 28px; overflow: hidden; display: flex; flex-direction: column; gap: 14px; }
+        .msg { display: flex; gap: 10px; max-width: 95%; }
+        .msg-ai { align-self: flex-start; } .msg-user { align-self: flex-end; flex-direction: row-reverse; }
+        .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+        .msg-bubble { padding: 12px 16px; border-radius: 16px; font-size: 12.5px; line-height: 1.7; }
+        .msg-ai .msg-bubble { background: var(--ai-bubble); border: 1px solid var(--border); border-top-left-radius: 4px; }
+        .msg-user .msg-bubble { background: var(--accent); color: #fff; border-top-right-radius: 4px; }
+        .tool-call { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(253,121,168,0.06); border: 1px solid rgba(253,121,168,0.12); border-radius: 10px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent3); align-self: flex-start; margin-left: 38px; }
+        .tool-call .tool-name { font-weight: 700; } .tool-call .tool-detail { color: var(--text-muted); }
+        .file-footer { margin-left: 38px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); padding: 4px 0; border-top: 1px dashed rgba(255,255,255,0.05); }
+        .file-footer span { color: var(--accent); }
+        .msg-system { text-align: center; padding: 6px 16px; }
+        .msg-system-inner { display: inline-block; font-size: 11px; color: var(--text-muted); padding: 5px 14px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+        /* === RIGHT === */
+        .panel-right { background: var(--bg-card); border-left: 1px solid var(--border); padding: 20px 18px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        .panel-right-scroll { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        .output-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; flex-shrink: 0; }
+        .output-card-title { font-size: 11px; font-weight: 700; color: var(--accent2); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+        .paper-item { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+        .paper-item:last-child { margin-bottom: 0; }
+        .paper-rank { width: 20px; height: 20px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 900; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+        .pr-1 { background: rgba(253,121,168,0.15); color: var(--accent3); }
+        .pr-2 { background: rgba(108,92,231,0.15); color: var(--accent); }
+        .pr-3 { background: rgba(0,206,201,0.15); color: var(--accent2); }
+        .pr-4 { background: rgba(253,203,110,0.15); color: var(--accent4); }
+        .pr-5 { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+        .paper-info { font-size: 11px; line-height: 1.4; color: var(--text-dim); }
+        .paper-info strong { color: var(--text); font-weight: 600; }
+        .paper-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border-radius: 4px; margin-top: 2px; }
+        .ptag-core { background: rgba(253,121,168,0.12); color: var(--accent3); }
+        .ptag-related { background: rgba(108,92,231,0.12); color: var(--accent); }
+        .ptag-method { background: rgba(0,206,201,0.12); color: var(--accent2); }
+        .note-preview { font-size: 11px; color: var(--text-dim); line-height: 1.6; padding-left: 12px; border-left: 2px solid var(--accent); }
+        .note-field { margin-bottom: 3px; } .note-field-label { color: var(--accent2); font-weight: 700; font-size: 10px; }
+        .proposal-section { margin-bottom: 6px; } .proposal-section:last-child { margin-bottom: 0; }
+        .proposal-h { font-size: 12px; font-weight: 700; color: var(--accent4); margin-bottom: 2px; }
+        .proposal-text { font-size: 11px; color: var(--text-dim); line-height: 1.5; padding-left: 16px; }
+        .gap-item { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+        .gap-item:last-child { margin-bottom: 0; }
+        .gap-icon { width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; background: rgba(253,121,168,0.15); color: var(--accent3); font-weight: 900; font-family: 'JetBrains Mono', monospace; }
+        .gap-text { font-size: 11px; line-height: 1.4; color: var(--text-dim); }
+        .gap-text strong { color: var(--text); }
+        .watermark { position: fixed; bottom: 16px; right: 24px; font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; opacity: 0.5; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-logo">🐱 ResearchClaws</div>
+            <div class="header-case">Case 2 · 一晚上从零到研究提案</div>
+            <span class="header-tag tag-interactive">💬 交互式驱动</span>
+            <span class="header-tag tag-deep">🧠 深度研究</span>
+        </div>
+        <div class="header-right">
+            <span>2026-03-20 22:00 → 03-21 01:30</span>
+            <span style="color:var(--accent4)">●</span>
+            <span>~3.5h · 26 篇论文 · 3 篇精读 · 1 份提案</span>
+        </div>
+    </div>
+
+    <!-- LEFT: 4-PHASE PIPELINE -->
+    <div class="panel-left">
+        <div class="panel-title">🔬 研究流程 (4 Phase)</div>
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-icon pi-1">🔍</div>
+                <div class="phase-label">Phase 1: 论文发现</div>
+                <div class="phase-time">22:00 – 22:25</div>
+            </div>
+            <div class="phase-desc">用户提出研究问题 → Agent 搜索 arXiv / Semantic Scholar<br>筛选 26 篇候选 → 按相关性×影响力排序 Top 10</div>
+            <div class="phase-tools">
+                <span class="phase-tool-tag pt-search">arxiv_search</span>
+                <span class="phase-tool-tag pt-search">semantic_scholar</span>
+                <span class="phase-tool-tag pt-search">tavily</span>
+            </div>
+        </div>
+        <div class="phase-arrow">↓</div>
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-icon pi-2">📖</div>
+                <div class="phase-label">Phase 2: 深度阅读</div>
+                <div class="phase-time">22:25 – 23:40</div>
+            </div>
+            <div class="phase-desc">用户选择 3 篇精读 → Agent 下载全文 PDF<br>DNL 模板生成结构化笔记 → 写入 Obsidian Vault</div>
+            <div class="phase-tools">
+                <span class="phase-tool-tag pt-read">pdf_analysis</span>
+                <span class="phase-tool-tag pt-write">obsidian_write</span>
+            </div>
+        </div>
+        <div class="phase-arrow">↓</div>
+        <div class="phase">
+            <div class="phase-header">
+                <div class="phase-icon pi-3">🧩</div>
+                <div class="phase-label">Phase 3: Gap 分析</div>
+                <div class="phase-time">23:40 – 00:15</div>
+            </div>
+            <div class="phase-desc">交叉对比 3 篇笔记 → 识别研究空白<br>结合用户研究背景(ReMemR1) → 发现 2 个可行切入点</div>
+            <div class="phase-tools">
+                <span class="phase-tool-tag pt-read">memory_search</span>
+                <span class="phase-tool-tag pt-agent">cross_analysis</span>
+            </div>
+        </div>
+        <div class="phase-arrow">↓</div>
+        <div class="phase active">
+            <div class="phase-header">
+                <div class="phase-icon pi-4">📝</div>
+                <div class="phase-label">Phase 4: 提案生成</div>
+                <div class="phase-time">00:15 – 01:30</div>
+            </div>
+            <div class="phase-desc">用户选择方向 → Agent 生成研究提案<br>3 轮交互迭代 → v3 定稿推送 repo</div>
+            <div class="phase-tools">
+                <span class="phase-tool-tag pt-write">obsidian_write</span>
+                <span class="phase-tool-tag pt-agent">iterative_refine</span>
+                <span class="phase-tool-tag pt-write">git push</span>
+            </div>
+        </div>
+        <div class="stats-box">
+            <div class="stats-title">📊 本次产出</div>
+            <div class="stat-row"><span class="stat-label">论文扫描</span><span class="stat-value sv-cyan">26 篇</span></div>
+            <div class="stat-row"><span class="stat-label">深度阅读笔记</span><span class="stat-value sv-purple">3 份 (DNL)</span></div>
+            <div class="stat-row"><span class="stat-label">Research Gap</span><span class="stat-value sv-pink">2 个</span></div>
+            <div class="stat-row"><span class="stat-label">研究提案</span><span class="stat-value sv-gold">1 份 (v3)</span></div>
+            <div class="stat-row"><span class="stat-label">人工等价耗时</span><span class="stat-value sv-pink">~2 周</span></div>
+        </div>
+    </div>
+
+    <!-- CENTER: CHAT -->
+    <div class="panel-center">
+        <div class="chat-header">
+            <div class="chat-avatar avatar-ai">🐱</div>
+            <div>
+                <div class="chat-name">Octivia · Research Assistant</div>
+                <div class="chat-status">● Deep Research Mode</div>
+            </div>
+        </div>
+        <div class="chat-body">
+            <div class="msg msg-user">
+                <div class="msg-avatar avatar-user">👤</div>
+                <div class="msg-bubble">我想研究 "agent long-term memory + RL" 方向，帮我找找最近的相关工作，看看有没有 research gap</div>
+            </div>
+            <div class="tool-call">
+                <span>🔍</span>
+                <span class="tool-name">arxiv_search</span>
+                <span class="tool-detail">"agent memory reinforcement learning" · 26 results</span>
+            </div>
+            <div class="tool-call">
+                <span>🔍</span>
+                <span class="tool-name">semantic_scholar</span>
+                <span class="tool-detail">cross-reference · citation graph · influence score</span>
+            </div>
+            <div class="msg msg-ai">
+                <div class="msg-avatar avatar-ai" style="background:linear-gradient(135deg, var(--accent), var(--accent2))">🐱</div>
+                <div class="msg-bubble">
+                    找到 26 篇相关工作，筛出 Top 10！(o^▽^o)<br><br>
+                    <strong style="color:var(--accent4)">🏆 Top 3 最值得精读：</strong><br>
+                    ① <strong>MemAgent-RL</strong> — RL 训练 agent 学何时读/写记忆<br>
+                    ② <strong>RetroFormer</strong> — 回顾式 policy gradient 优化检索<br>
+                    ③ <strong>STILL-ALIVE</strong> — 持久化 agent memory benchmark<br><br>
+                    <span style="font-size:11px;color:var(--text-muted)">按相关性×影响力排序 · 完整列表见右侧 →</span>
+                </div>
+            </div>
+            <div class="msg msg-user">
+                <div class="msg-avatar avatar-user">👤</div>
+                <div class="msg-bubble">这三篇都精读一下，DNL 模板出笔记</div>
+            </div>
+            <div class="tool-call">
+                <span>📄</span>
+                <span class="tool-name">pdf_analysis</span>
+                <span class="tool-detail">×3 papers · DNL template · writing to Obsidian</span>
+            </div>
+            <div class="msg-system">
+                <div class="msg-system-inner">⏳ 23:40 · 3 份 DNL 笔记已写入 Obsidian Vault</div>
+            </div>
+            <div class="msg msg-ai">
+                <div class="msg-avatar avatar-ai" style="background:linear-gradient(135deg, var(--accent), var(--accent2))">🐱</div>
+                <div class="msg-bubble">
+                    三篇读完了！交叉分析发现 <strong style="color:var(--accent3)">2 个 Research Gap</strong>：<br><br>
+                    <strong style="color:var(--accent4)">Gap A:</strong> RL-for-memory 都假设固定容量 — 没人做<strong>自适应容量</strong>管理<br>
+                    <strong style="color:var(--accent4)">Gap B:</strong> 缺少统一 benchmark 评测<strong>跨任务记忆迁移</strong><br><br>
+                    Gap A 更适合你的 ReMemR1 背景，要以此写提案吗？
+                </div>
+            </div>
+            <div class="file-footer">
+                > <span>papers/memagent-rl.md</span> +142 lines<br>
+                > <span>papers/retroformer.md</span> +128 lines<br>
+                > <span>papers/still-alive.md</span> +115 lines
+            </div>
+            <div class="msg msg-user">
+                <div class="msg-avatar avatar-user">👤</div>
+                <div class="msg-bubble">方向 A，写吧</div>
+            </div>
+            <div class="msg msg-ai">
+                <div class="msg-avatar avatar-ai" style="background:linear-gradient(135deg, var(--accent), var(--accent2))">🐱</div>
+                <div class="msg-bubble">
+                    提案 v3 定稿！核心 idea：<strong style="color:var(--accent4)">AdaptMem</strong> — 用 RL 训练 agent 动态调整记忆容量与淘汰策略。<br><br>
+                    三轮迭代完成，已推送 repo ✓<br>
+                    <span style="font-size:11px;color:var(--text-muted)">Motivation · Method · 4-week Timeline · Risk Analysis</span>
+                </div>
+            </div>
+            <div class="file-footer">
+                > <span>proposals/adaptmem.md</span> +230 lines<br>
+                > <span>commit e7f2a1c:</span> Add AdaptMem proposal v3<br>
+                > <span>pushed:</span> origin/main
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: OUTPUT PREVIEW -->
+    <div class="panel-right">
+        <div class="panel-title">📄 产出预览</div>
+        <div class="panel-right-scroll">
+            <!-- Paper discovery -->
+            <div class="output-card">
+                <div class="output-card-title">🔍 论文发现 Top 5 / 26</div>
+                <div class="paper-item">
+                    <div class="paper-rank pr-1">1</div>
+                    <div class="paper-info"><strong>MemAgent-RL</strong> — RL 控制记忆读写时机<br><span class="paper-tag ptag-core">⭐ 核心</span></div>
+                </div>
+                <div class="paper-item">
+                    <div class="paper-rank pr-2">2</div>
+                    <div class="paper-info"><strong>RetroFormer</strong> — 回顾式记忆检索优化<br><span class="paper-tag ptag-core">⭐ 核心</span></div>
+                </div>
+                <div class="paper-item">
+                    <div class="paper-rank pr-3">3</div>
+                    <div class="paper-info"><strong>STILL-ALIVE</strong> — 长期记忆 Benchmark<br><span class="paper-tag ptag-method">Benchmark</span></div>
+                </div>
+                <div class="paper-item">
+                    <div class="paper-rank pr-4">4</div>
+                    <div class="paper-info"><strong>Reflexion</strong> — Self-reflection for agents<br><span class="paper-tag ptag-related">相关</span></div>
+                </div>
+                <div class="paper-item">
+                    <div class="paper-rank pr-5">5</div>
+                    <div class="paper-info"><strong>MemoryBank</strong> — LLM memory management<br><span class="paper-tag ptag-related">相关</span></div>
+                </div>
+            </div>
+
+            <!-- DNL Note preview -->
+            <div class="output-card">
+                <div class="output-card-title">📖 DNL 笔记预览 (MemAgent-RL)</div>
+                <div class="note-preview">
+                    <div class="note-field"><span class="note-field-label">Motivation:</span> 现有 agent 缺乏主动记忆管理，记忆操作依赖 prompt engineering</div>
+                    <div class="note-field"><span class="note-field-label">Method:</span> 用 PPO 训练 memory controller — 学习 read/write/forget 三种 action</div>
+                    <div class="note-field"><span class="note-field-label">Key Result:</span> WebArena +18% · ALFWorld +23% over SoTA</div>
+                    <div class="note-field"><span class="note-field-label">Limitation:</span> 固定 memory slot 数量(K=16)，无法适应不同任务复杂度</div>
+                    <div class="note-field"><span class="note-field-label">Relevance:</span> 直接可扩展 → 自适应 K 是明确 gap</div>
+                </div>
+            </div>
+
+            <!-- Gap Analysis -->
+            <div class="output-card" style="border-color:rgba(253,121,168,0.2); background:rgba(253,121,168,0.03)">
+                <div class="output-card-title" style="color:var(--accent3)">🧩 Research Gap 分析</div>
+                <div class="gap-item">
+                    <div class="gap-icon">A</div>
+                    <div class="gap-text"><strong>自适应记忆容量</strong> — 所有 RL-memory 工作假设固定 K，无人探索动态扩缩<br><span class="paper-tag ptag-core" style="margin-top:2px">✓ 选定方向</span></div>
+                </div>
+                <div class="gap-item">
+                    <div class="gap-icon">B</div>
+                    <div class="gap-text"><strong>跨任务记忆迁移</strong> — 缺少 benchmark 评测 agent 记忆在新任务上的复用能力</div>
+                </div>
+            </div>
+
+            <!-- Proposal preview -->
+            <div class="output-card" style="border-color:rgba(253,203,110,0.25); background:rgba(253,203,110,0.03)">
+                <div class="output-card-title" style="color:var(--accent4)">📝 AdaptMem 研究提案 (v3)</div>
+                <div class="proposal-section">
+                    <div class="proposal-h">💡 Core Idea</div>
+                    <div class="proposal-text">RL-trained memory controller with <strong style="color:var(--accent4)">dynamic capacity allocation</strong> — agent 自主决定 K 值、淘汰策略和记忆粒度</div>
+                </div>
+                <div class="proposal-section">
+                    <div class="proposal-h">🏗 Method Overview</div>
+                    <div class="proposal-text">① 扩展 MemAgent-RL 为可变 K<br>② reward shaping: task success + memory efficiency<br>③ curriculum: 简单任务→复杂任务 progressive training</div>
+                </div>
+                <div class="proposal-section">
+                    <div class="proposal-h">📅 Timeline (4 weeks)</div>
+                    <div class="proposal-text">W1: 复现 baseline · W2: 可变 K 实现<br>W3: RL training + ablation · W4: 写作</div>
+                </div>
+                <div class="proposal-section">
+                    <div class="proposal-h">⚠️ Risks</div>
+                    <div class="proposal-text">R1: 可变 K 导致 RL 不稳定 → 渐进式课程学习<br>R2: 评测公平性 → 控制总 memory token 预算</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="watermark">github.com/syr-cn/ResearchClaws · 上朝式科研</div>
+</body>
+</html>

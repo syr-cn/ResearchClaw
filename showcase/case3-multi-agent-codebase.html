@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case 3: 多 Agent 协同代码实现 | ResearchClaws</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0f1117; --bg-card: #1a1d27; --bg-chat: #141620;
+            --accent: #6c5ce7; --accent2: #00cec9; --accent3: #fd79a8;
+            --accent4: #fdcb6e; --accent5: #55efc4;
+            --text: #e2e8f0; --text-dim: #8892a8; --text-muted: #4a5568;
+            --user-bubble: #2d3748; --ai-bubble: #1e2235;
+            --border: rgba(255,255,255,0.06);
+        }
+        html, body { width: 1920px; height: 1080px; font-family: 'Noto Sans SC', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
+        .page { display: grid; grid-template-columns: 380px 1fr 380px; grid-template-rows: 72px 1fr; height: 1080px; width: 1920px; }
+
+        /* HEADER */
+        .header { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; padding: 0 36px; background: linear-gradient(90deg, rgba(108,92,231,0.08), transparent 50%, rgba(85,239,196,0.08)); border-bottom: 1px solid var(--border); }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .header-logo { font-size: 22px; font-weight: 900; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-case { font-size: 14px; color: var(--text-dim); padding: 4px 14px; background: rgba(85,239,196,0.12); border-radius: 20px; border: 1px solid rgba(85,239,196,0.2); }
+        .header-tag { padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 500; }
+        .tag-multi { background: rgba(85,239,196,0.12); color: var(--accent5); border: 1px solid rgba(85,239,196,0.25); }
+        .tag-code { background: rgba(108,92,231,0.12); color: var(--accent); border: 1px solid rgba(108,92,231,0.25); }
+        .header-right { display: flex; align-items: center; gap: 24px; font-size: 13px; color: var(--text-muted); }
+
+        /* LEFT: AGENT TOPOLOGY */
+        .panel-left { background: var(--bg-card); border-right: 1px solid var(--border); padding: 24px 20px; display: flex; flex-direction: column; overflow: hidden; }
+        .panel-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+
+        .agent-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+        .agent-card.coordinator { border-color: rgba(108,92,231,0.4); background: rgba(108,92,231,0.04); }
+        .agent-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .agent-avatar { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+        .av-coord { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+        .av-worker1 { background: rgba(0,206,201,0.2); }
+        .av-worker2 { background: rgba(253,121,168,0.2); }
+        .av-worker3 { background: rgba(253,203,110,0.2); }
+        .agent-name { font-size: 13px; font-weight: 700; }
+        .agent-role { font-size: 10px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+        .agent-status { margin-left: auto; font-size: 10px; padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+        .as-done { background: rgba(85,239,196,0.12); color: var(--accent5); }
+        .as-active { background: rgba(108,92,231,0.12); color: var(--accent); }
+        .agent-desc { font-size: 11px; color: var(--text-dim); line-height: 1.6; }
+        .agent-files { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .agent-file { font-size: 10px; padding: 2px 8px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; background: rgba(255,255,255,0.04); color: var(--text-muted); border: 1px solid var(--border); }
+
+        .agent-arrow { text-align: center; color: var(--text-muted); font-size: 12px; margin: 2px 0; display: flex; justify-content: center; gap: 40px; }
+
+        .stats-box { margin-top: auto; background: rgba(85,239,196,0.06); border: 1px solid rgba(85,239,196,0.15); border-radius: 12px; padding: 14px; }
+        .stats-title { font-size: 11px; font-weight: 700; color: var(--accent5); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; }
+        .stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .stat-row:last-child { margin-bottom: 0; }
+        .stat-label { font-size: 11px; color: var(--text-dim); }
+        .stat-value { font-size: 12px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .sv-cyan { color: var(--accent2); } .sv-purple { color: var(--accent); }
+        .sv-pink { color: var(--accent3); } .sv-green { color: var(--accent5); }
+
+        /* CENTER: CHAT */
+        .panel-center { background: var(--bg-chat); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-header { padding: 16px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .chat-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .avatar-ai { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+        .avatar-user { background: var(--user-bubble); font-size: 14px; }
+        .chat-name { font-size: 14px; font-weight: 700; }
+        .chat-status { font-size: 12px; color: var(--accent5); }
+        .chat-body { flex: 1; padding: 16px 28px; overflow: hidden; display: flex; flex-direction: column; gap: 12px; }
+        .msg { display: flex; gap: 10px; max-width: 95%; }
+        .msg-ai { align-self: flex-start; } .msg-user { align-self: flex-end; flex-direction: row-reverse; }
+        .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+        .msg-bubble { padding: 12px 16px; border-radius: 16px; font-size: 12.5px; line-height: 1.7; }
+        .msg-ai .msg-bubble { background: var(--ai-bubble); border: 1px solid var(--border); border-top-left-radius: 4px; }
+        .msg-user .msg-bubble { background: var(--accent); color: #fff; border-top-right-radius: 4px; }
+        .tool-call { display: flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(85,239,196,0.06); border: 1px solid rgba(85,239,196,0.12); border-radius: 10px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent5); align-self: flex-start; margin-left: 38px; }
+        .tool-call .tool-name { font-weight: 700; } .tool-call .tool-detail { color: var(--text-muted); }
+        .file-footer { margin-left: 38px; font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); padding: 4px 0; border-top: 1px dashed rgba(255,255,255,0.05); }
+        .file-footer span { color: var(--accent); }
+        .msg-system { text-align: center; padding: 6px 16px; }
+        .msg-system-inner { display: inline-block; font-size: 11px; color: var(--text-muted); padding: 5px 14px; border-radius: 16px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; }
+
+        /* Subagent bubble */
+        .msg-sub { align-self: flex-start; }
+        .msg-sub .msg-bubble { background: rgba(85,239,196,0.06); border: 1px solid rgba(85,239,196,0.15); border-top-left-radius: 4px; }
+        .sub-label { font-size: 10px; color: var(--accent5); font-weight: 700; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace; }
+
+        /* RIGHT: OUTPUT */
+        .panel-right { background: var(--bg-card); border-left: 1px solid var(--border); padding: 20px 18px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        .panel-right-scroll { flex: 1; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+        .output-card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; flex-shrink: 0; }
+        .output-card-title { font-size: 11px; font-weight: 700; color: var(--accent2); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+
+        /* Kanban */
+        .kanban { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+        .kanban-col-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; text-align: center; padding: 3px; border-radius: 6px; }
+        .kc-todo { color: var(--text-muted); background: rgba(255,255,255,0.03); }
+        .kc-doing { color: var(--accent); background: rgba(108,92,231,0.08); }
+        .kc-done { color: var(--accent5); background: rgba(85,239,196,0.08); }
+        .kanban-item { font-size: 10px; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); margin-bottom: 4px; line-height: 1.4; color: var(--text-dim); }
+        .kanban-item strong { color: var(--text); font-weight: 600; }
+        .kanban-item .ki-agent { font-size: 9px; color: var(--accent5); font-family: 'JetBrains Mono', monospace; }
+
+        /* Code diff preview */
+        .code-block { font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.6; padding: 10px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); overflow: hidden; }
+        .code-line { white-space: pre; }
+        .code-add { color: var(--accent5); }
+        .code-del { color: var(--accent3); opacity: 0.6; }
+        .code-comment { color: var(--text-muted); }
+        .code-keyword { color: var(--accent); }
+        .code-string { color: var(--accent4); }
+
+        /* PR summary */
+        .pr-item { display: flex; gap: 8px; margin-bottom: 6px; align-items: flex-start; }
+        .pr-item:last-child { margin-bottom: 0; }
+        .pr-icon { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+        .pr-merged { background: rgba(108,92,231,0.2); color: var(--accent); }
+        .pr-open { background: rgba(85,239,196,0.2); color: var(--accent5); }
+        .pr-text { font-size: 11px; line-height: 1.4; color: var(--text-dim); }
+        .pr-text strong { color: var(--text); }
+
+        /* Test results */
+        .test-bar { display: flex; gap: 2px; height: 6px; border-radius: 3px; overflow: hidden; margin-top: 8px; }
+        .test-pass { background: var(--accent5); flex: 47; }
+        .test-fail { background: var(--accent3); flex: 2; }
+        .test-skip { background: var(--text-muted); flex: 3; }
+        .test-label { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+        .watermark { position: fixed; bottom: 16px; right: 24px; font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; opacity: 0.5; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-left">
+            <div class="header-logo">🐱 ResearchClaws</div>
+            <div class="header-case">Case 3 · 多 Agent 协同代码实现</div>
+            <span class="header-tag tag-multi">🤖×4 Multi-Agent</span>
+            <span class="header-tag tag-code">⚡ ClawTeam</span>
+        </div>
+        <div class="header-right">
+            <span>2026-03-22 14:00 → 15:20</span>
+            <span style="color:var(--accent5)">●</span>
+            <span>~80min · 4 Agents · 12 files · 1 PR merged</span>
+        </div>
+    </div>
+
+    <!-- LEFT: AGENT TOPOLOGY -->
+    <div class="panel-left">
+        <div class="panel-title">🤖 Agent 拓扑</div>
+
+        <div class="agent-card coordinator">
+            <div class="agent-header">
+                <div class="agent-avatar av-coord">🐱</div>
+                <div>
+                    <div class="agent-name">Octivia (Coordinator)</div>
+                    <div class="agent-role">orchestrator · task decomposition · review</div>
+                </div>
+                <div class="agent-status as-active">● coordinating</div>
+            </div>
+            <div class="agent-desc">接收用户需求 → 拆分为 3 个子任务 → 分配给 Worker Agents → 代码审查 → 合并 PR</div>
+        </div>
+
+        <div class="agent-arrow">↓ spawn ↓ spawn ↓ spawn</div>
+
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-avatar av-worker1">🔧</div>
+                <div>
+                    <div class="agent-name">Worker-1: Data Pipeline</div>
+                    <div class="agent-role">claude-sonnet-4 · coding-agent</div>
+                </div>
+                <div class="agent-status as-done">✓ done</div>
+            </div>
+            <div class="agent-desc">实现数据加载、预处理、memory buffer 构建</div>
+            <div class="agent-files">
+                <span class="agent-file">data/loader.py</span>
+                <span class="agent-file">data/buffer.py</span>
+                <span class="agent-file">data/preprocess.py</span>
+                <span class="agent-file">tests/test_data.py</span>
+            </div>
+        </div>
+
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-avatar av-worker2">🧠</div>
+                <div>
+                    <div class="agent-name">Worker-2: Memory Controller</div>
+                    <div class="agent-role">claude-sonnet-4 · coding-agent</div>
+                </div>
+                <div class="agent-status as-done">✓ done</div>
+            </div>
+            <div class="agent-desc">实现 AdaptMem 核心：可变 K 的 RL memory controller</div>
+            <div class="agent-files">
+                <span class="agent-file">models/controller.py</span>
+                <span class="agent-file">models/policy.py</span>
+                <span class="agent-file">models/memory.py</span>
+                <span class="agent-file">tests/test_model.py</span>
+            </div>
+        </div>
+
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-avatar av-worker3">📊</div>
+                <div>
+                    <div class="agent-name">Worker-3: Training & Eval</div>
+                    <div class="agent-role">claude-sonnet-4 · coding-agent</div>
+                </div>
+                <div class="agent-status as-done">✓ done</div>
+            </div>
+            <div class="agent-desc">PPO 训练循环、评测脚本、wandb 集成</div>
+            <div class="agent-files">
+                <span class="agent-file">train.py</span>
+                <span class="agent-file">evaluate.py</span>
+                <span class="agent-file">configs/ppo.yaml</span>
+                <span class="agent-file">tests/test_train.py</span>
+            </div>
+        </div>
+
+        <div class="stats-box">
+            <div class="stats-title">📈 协同效率</div>
+            <div class="stat-row"><span class="stat-label">并行 Agent 数</span><span class="stat-value sv-green">3 workers</span></div>
+            <div class="stat-row"><span class="stat-label">总代码量</span><span class="stat-value sv-cyan">~1,200 LoC</span></div>
+            <div class="stat-row"><span class="stat-label">测试覆盖率</span><span class="stat-value sv-purple">94%</span></div>
+            <div class="stat-row"><span class="stat-label">串行等价耗时</span><span class="stat-value sv-pink">~5h</span></div>
+            <div class="stat-row"><span class="stat-label">实际耗时</span><span class="stat-value sv-green">~80min</span></div>
+        </div>
+    </div>
+
+    <!-- CENTER: CHAT -->
+    <div class="panel-center">
+        <div class="chat-header">
+            <div class="chat-avatar avatar-ai">🐱</div>
+            <div>
+                <div class="chat-name">Octivia · Team Coordinator</div>
+                <div class="chat-status">● Multi-Agent Mode · 3 Workers</div>
+            </div>
+        </div>
+        <div class="chat-body">
+            <div class="msg msg-user">
+                <div class="msg-avatar avatar-user">👤</div>
+                <div class="msg-bubble">帮我实现 AdaptMem 的 prototype：data pipeline + RL memory controller + training loop，用 ClawTeam 多 agent 并行做</div>
+            </div>
+
+            <div class="tool-call">
+                <span>🤖</span>
+                <span class="tool-name">clawteam spawn</span>
+                <span class="tool-detail">3 workers · task decomposition · parallel execution</span>
+            </div>
+
+            <div class="msg msg-ai">
+                <div class="msg-avatar avatar-ai" style="background:linear-gradient(135deg, var(--accent), var(--accent2))">🐱</div>
+                <div class="msg-bubble">
+                    拆分为 3 个并行任务，已启动 ClawTeam！(*^ω^*)<br><br>
+                    🔧 <strong>Worker-1</strong>: Data Pipeline (loader + buffer + preprocess)<br>
+                    🧠 <strong>Worker-2</strong>: Memory Controller (variable-K + policy network)<br>
+                    📊 <strong>Worker-3</strong>: Training & Eval (PPO loop + wandb + evaluate)<br><br>
+                    <span style="font-size:11px;color:var(--text-muted)">每个 worker 独立分支开发，我来做接口约定和最终 review</span>
+                </div>
+            </div>
+
+            <div class="msg-system">
+                <div class="msg-system-inner">⏳ 14:15 · 3 workers 开始并行编码...</div>
+            </div>
+
+            <!-- Worker reports -->
+            <div class="msg msg-sub">
+                <div class="msg-avatar" style="background:rgba(0,206,201,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px;">🔧</div>
+                <div class="msg-bubble">
+                    <div class="sub-label">Worker-1 · Data Pipeline</div>
+                    完成！data/loader.py · buffer.py · preprocess.py<br>
+                    含 MemoryBuffer 支持动态容量调整 + 4 个测试全通过 ✓
+                </div>
+            </div>
+
+            <div class="msg msg-sub">
+                <div class="msg-avatar" style="background:rgba(253,121,168,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px;">🧠</div>
+                <div class="msg-bubble">
+                    <div class="sub-label">Worker-2 · Memory Controller</div>
+                    完成！AdaptMemController 核心模块<br>
+                    支持 K ∈ [4, 64] 动态范围 + policy gradient capacity adjustment ✓
+                </div>
+            </div>
+
+            <div class="msg msg-sub">
+                <div class="msg-avatar" style="background:rgba(253,203,110,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px;">📊</div>
+                <div class="msg-bubble">
+                    <div class="sub-label">Worker-3 · Training & Eval</div>
+                    完成！PPO training loop + evaluation script<br>
+                    wandb 集成 + curriculum schedule config ✓
+                </div>
+            </div>
+
+            <div class="msg msg-ai">
+                <div class="msg-avatar avatar-ai" style="background:linear-gradient(135deg, var(--accent), var(--accent2))">🐱</div>
+                <div class="msg-bubble">
+                    三个 Worker 全部完成！Review 通过 ✓<br><br>
+                    📦 <strong style="color:var(--accent5)">12 files · ~1,200 LoC · 47 tests (94% pass)</strong><br>
+                    2 个 minor issue 已自动修复，PR 已合并到 main<br><br>
+                    <span style="font-size:11px;color:var(--text-muted)">可以直接 python train.py 开始训练了！</span>
+                </div>
+            </div>
+
+            <div class="file-footer">
+                > <span>12 files changed</span> +1,247 lines<br>
+                > <span>PR #3 merged:</span> feat: AdaptMem prototype implementation<br>
+                > <span>pushed:</span> origin/main
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT: OUTPUT -->
+    <div class="panel-right">
+        <div class="panel-title">📄 产出预览</div>
+        <div class="panel-right-scroll">
+            <!-- Kanban -->
+            <div class="output-card">
+                <div class="output-card-title">📋 任务看板 (ClawTeam)</div>
+                <div class="kanban">
+                    <div>
+                        <div class="kanban-col-title kc-todo">Todo</div>
+                        <div class="kanban-item" style="opacity:0.4"><strong>README</strong><br><span class="ki-agent">unassigned</span></div>
+                    </div>
+                    <div>
+                        <div class="kanban-col-title kc-doing">In Progress</div>
+                        <div class="kanban-item" style="opacity:0.4"><strong>Integration test</strong><br><span class="ki-agent">coordinator</span></div>
+                    </div>
+                    <div>
+                        <div class="kanban-col-title kc-done">Done ✓</div>
+                        <div class="kanban-item"><strong>Data Pipeline</strong><br><span class="ki-agent">worker-1</span></div>
+                        <div class="kanban-item"><strong>Memory Ctrl</strong><br><span class="ki-agent">worker-2</span></div>
+                        <div class="kanban-item"><strong>Train & Eval</strong><br><span class="ki-agent">worker-3</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Code preview -->
+            <div class="output-card">
+                <div class="output-card-title">💻 核心代码预览 (controller.py)</div>
+                <div class="code-block">
+<div class="code-line"><span class="code-keyword">class</span> <span style="color:var(--accent2)">AdaptMemController</span>:</div>
+<div class="code-line">    <span class="code-comment"># RL-trained memory controller</span></div>
+<div class="code-line">    <span class="code-comment"># with dynamic capacity K ∈ [4, 64]</span></div>
+<div class="code-line"></div>
+<div class="code-line code-add">+   def adjust_capacity(self, obs):</div>
+<div class="code-line code-add">+       action = self.policy(obs)</div>
+<div class="code-line code-add">+       delta_k = action[<span class="code-string">"capacity"</span>]</div>
+<div class="code-line code-add">+       self.K = clip(self.K + delta_k,</div>
+<div class="code-line code-add">+                     self.K_min, self.K_max)</div>
+<div class="code-line"></div>
+<div class="code-line code-add">+   def evict(self, memory_bank):</div>
+<div class="code-line code-add">+       scores = self.policy.score(</div>
+<div class="code-line code-add">+           memory_bank, mode=<span class="code-string">"evict"</span>)</div>
+<div class="code-line code-add">+       <span class="code-keyword">return</span> memory_bank.prune(</div>
+<div class="code-line code-add">+           scores, target_k=self.K)</div>
+                </div>
+            </div>
+
+            <!-- PR Summary -->
+            <div class="output-card">
+                <div class="output-card-title">🔀 PR Summary</div>
+                <div class="pr-item">
+                    <div class="pr-icon pr-merged">⬣</div>
+                    <div class="pr-text"><strong>#3 feat: AdaptMem prototype</strong><br>12 files · +1,247 -0 · 3 reviewers(auto)</div>
+                </div>
+                <div class="pr-item">
+                    <div class="pr-icon pr-merged">⬣</div>
+                    <div class="pr-text"><strong>#2 fix: buffer capacity edge case</strong><br>1 file · +8 -3 · auto-detected by coordinator</div>
+                </div>
+            </div>
+
+            <!-- Test results -->
+            <div class="output-card">
+                <div class="output-card-title">🧪 测试结果</div>
+                <div style="font-size:11px; color:var(--text-dim); margin-bottom:4px">47 passed · 2 failed (fixed) · 3 skipped</div>
+                <div class="test-bar">
+                    <div class="test-pass"></div>
+                    <div class="test-fail"></div>
+                    <div class="test-skip"></div>
+                </div>
+                <div class="test-label">
+                    <span style="color:var(--accent5)">94% pass</span>
+                    <span>47/50 tests · 2 auto-fixed</span>
+                </div>
+            </div>
+
+            <!-- File tree -->
+            <div class="output-card">
+                <div class="output-card-title">📁 项目结构</div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:11px; line-height:1.8; color:var(--text-dim);">
+                    <span style="color:var(--accent5)">adaptmem/</span><br>
+                    ├── data/<br>
+                    │   ├── <span style="color:var(--accent2)">loader.py</span> <span style="color:var(--text-muted);font-size:9px">worker-1</span><br>
+                    │   ├── <span style="color:var(--accent2)">buffer.py</span> <span style="color:var(--text-muted);font-size:9px">worker-1</span><br>
+                    │   └── <span style="color:var(--accent2)">preprocess.py</span> <span style="color:var(--text-muted);font-size:9px">worker-1</span><br>
+                    ├── models/<br>
+                    │   ├── <span style="color:var(--accent3)">controller.py</span> <span style="color:var(--text-muted);font-size:9px">worker-2</span><br>
+                    │   ├── <span style="color:var(--accent3)">policy.py</span> <span style="color:var(--text-muted);font-size:9px">worker-2</span><br>
+                    │   └── <span style="color:var(--accent3)">memory.py</span> <span style="color:var(--text-muted);font-size:9px">worker-2</span><br>
+                    ├── <span style="color:var(--accent4)">train.py</span> <span style="color:var(--text-muted);font-size:9px">worker-3</span><br>
+                    ├── <span style="color:var(--accent4)">evaluate.py</span> <span style="color:var(--text-muted);font-size:9px">worker-3</span><br>
+                    ├── configs/<br>
+                    │   └── <span style="color:var(--accent4)">ppo.yaml</span> <span style="color:var(--text-muted);font-size:9px">worker-3</span><br>
+                    └── tests/ <span style="color:var(--text-muted);font-size:9px">47 tests</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="watermark">github.com/syr-cn/ResearchClaws · 上朝式科研</div>
+</body>
+</html>
